@@ -266,27 +266,27 @@ label {
 }
 
 .nav-section {
-  margin-top: 42px;
+  margin-top: 68px;
 }
 
 .nav-section h2 {
-  margin: 0 0 18px 8px;
+  margin: 0 0 20px 8px;
   font-size: 22px;
 }
 
 .nav-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 18px;
 }
 
 .nav-card {
-  min-height: 64px;
+  min-height: 82px;
   display: grid;
-  grid-template-columns: 42px 1fr 18px;
+  grid-template-columns: 48px 1fr 20px;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 14px;
+  padding: 16px;
   border-radius: 8px;
   background: var(--bg-soft);
   border: 1px solid transparent;
@@ -302,8 +302,8 @@ label {
 }
 
 .nav-icon {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   display: grid;
   place-items: center;
@@ -332,12 +332,12 @@ label {
 }
 
 .nav-copy strong {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .nav-copy small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .nav-open {
@@ -515,7 +515,7 @@ label {
   }
 
   .nav-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 
   .admin-layout {
