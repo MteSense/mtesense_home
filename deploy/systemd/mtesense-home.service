@@ -1,0 +1,20 @@
+[Unit]
+Description=MteSense Home
+After=network.target
+
+[Service]
+Type=simple
+User=mtesense
+Group=mtesense
+WorkingDirectory=/opt/mtesense-home
+EnvironmentFile=/opt/mtesense-home/.env
+ExecStart=/opt/mtesense-home/mtesense-home
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/mtesense-home/data /opt/mtesense-home/public_uploads
+
+[Install]
+WantedBy=multi-user.target

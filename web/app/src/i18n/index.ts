@@ -1,0 +1,71 @@
+import { createI18n } from 'vue-i18n'
+
+const messages = {
+  zh: {
+    searchPlaceholder: '输入搜索内容',
+    search: '搜索',
+    admin: '管理',
+    logout: '退出',
+    login: '登录',
+    username: '用户名',
+    password: '密码',
+    links: '导航',
+    appearance: '外观',
+    dashboard: '概览',
+    addGroup: '添加分组',
+    addLink: '添加链接',
+    save: '保存',
+    delete: '删除',
+    edit: '编辑',
+    cancel: '取消',
+    title: '标题',
+    url: '链接',
+    description: '描述',
+    icon: '图标',
+    visible: '显示',
+    sortOrder: '排序',
+    openInNewTab: '新窗口打开',
+    siteTitle: '站点标题',
+    subtitle: '副标题',
+    backgroundImage: '背景图',
+    defaultTheme: '默认主题',
+    searchEngine: '搜索引擎'
+  },
+  en: {
+    searchPlaceholder: 'Enter search content',
+    search: 'Search',
+    admin: 'Admin',
+    logout: 'Logout',
+    login: 'Login',
+    username: 'Username',
+    password: 'Password',
+    links: 'Navigation',
+    appearance: 'Appearance',
+    dashboard: 'Dashboard',
+    addGroup: 'Add group',
+    addLink: 'Add link',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    cancel: 'Cancel',
+    title: 'Title',
+    url: 'URL',
+    description: 'Description',
+    icon: 'Icon',
+    visible: 'Visible',
+    sortOrder: 'Order',
+    openInNewTab: 'Open in new tab',
+    siteTitle: 'Site title',
+    subtitle: 'Subtitle',
+    backgroundImage: 'Background image',
+    defaultTheme: 'Default theme',
+    searchEngine: 'Search engine'
+  }
+}
+
+export default createI18n({
+  legacy: false,
+  locale: localStorage.getItem('mtesense_locale') || 'zh',
+  fallbackLocale: 'en',
+  messages
+})

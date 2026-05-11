@@ -1,0 +1,24 @@
+{
+  "name": "mtesense-home-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "lucide-vue-next": "^0.555.0",
+    "pinia": "^3.0.4",
+    "vite": "^7.2.4",
+    "vue": "^3.5.25",
+    "vue-i18n": "^9.14.5",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.1.4"
+  }
+}
