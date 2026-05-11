@@ -1,0 +1,28 @@
+<svg id="favicon-m" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566.93 566.93" role="img" aria-label="M logo favicon">
+  <defs>
+    <linearGradient id="mark-gradient" x1="80" y1="486" x2="488" y2="82" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ED4C9"/>
+      <stop offset="0.48" stop-color="#4F8BFF"/>
+      <stop offset="1" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="bar-gradient" x1="68" y1="526" x2="499" y2="526" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EF4444"/>
+      <stop offset="0.5" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#DC2626"/>
+    </linearGradient>
+  </defs>
+  <path
+    d="M98.5 468.5V134.5C98.5 114.9 114.4 99 134 99H164.8C180.3 99 194 109 198.7 123.8L283.5 352.9L368.2 123.8C373 109 386.6 99 402.2 99H433C452.6 99 468.4 114.9 468.4 134.5V468.5"
+    fill="none"
+    stroke="url(#mark-gradient)"
+    stroke-width="68"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <path
+    d="M68 526H499"
+    fill="none"
+    stroke="url(#bar-gradient)"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>

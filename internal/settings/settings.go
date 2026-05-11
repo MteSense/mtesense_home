@@ -35,7 +35,7 @@ func NewService(db *sql.DB) *Service {
 
 func (s *Service) GetPublic() (PublicSettings, error) {
 	appearance := Appearance{
-		SiteTitle:    "MteSense Home",
+		SiteTitle:    "MteSense",
 		Subtitle:     "Personal navigation",
 		DefaultTheme: "dark",
 		CardOpacity:  0.34,
@@ -57,7 +57,7 @@ func (s *Service) GetPublic() (PublicSettings, error) {
 func (s *Service) SavePublic(settings PublicSettings) (PublicSettings, error) {
 	settings.Search = normalizeSearch(settings.Search)
 	if settings.Appearance.SiteTitle == "" {
-		settings.Appearance.SiteTitle = "MteSense Home"
+		settings.Appearance.SiteTitle = "MteSense"
 	}
 	if settings.Appearance.DefaultTheme != "light" && settings.Appearance.DefaultTheme != "dark" {
 		settings.Appearance.DefaultTheme = "dark"

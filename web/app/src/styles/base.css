@@ -93,7 +93,7 @@ label {
 .home-page::before {
   content: "";
   position: fixed;
-  inset: 54px 0 0;
+  inset: 0;
   pointer-events: none;
   backdrop-filter: blur(18px);
   background:
@@ -106,27 +106,6 @@ label {
     linear-gradient(150deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.18)),
     radial-gradient(ellipse at 52% 16%, rgba(110, 149, 214, 0.28), transparent 38%);
 }
-
-.window-bar {
-  position: relative;
-  z-index: 1;
-  height: 54px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 18px;
-  background: #242424;
-}
-
-.window-bar span {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-}
-
-.window-bar span:nth-child(1) { background: #e27861; }
-.window-bar span:nth-child(2) { background: #ecc55d; }
-.window-bar span:nth-child(3) { background: #86cd65; }
 
 .home-shell {
   position: relative;
@@ -158,23 +137,37 @@ label {
   font-size: clamp(34px, 5.4vw, 56px);
   line-height: 1;
   letter-spacing: 0;
+  color: transparent;
+  background: linear-gradient(135deg, #72d8ff 0%, #8c8cff 45%, #c57bff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .clock {
   display: grid;
-  gap: 2px;
-  padding-bottom: 8px;
+  gap: 1px;
+  padding-bottom: 6px;
   border-left: 2px solid var(--line);
   padding-left: 14px;
 }
 
 .clock strong {
-  font-size: 24px;
+  font-size: 16px;
+  line-height: 1.2;
 }
 
 .clock span,
 .subtitle {
   color: var(--muted);
+}
+
+.clock span {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.clock .lunar {
+  white-space: nowrap;
 }
 
 .home-actions,
@@ -189,9 +182,10 @@ label {
 }
 
 .home-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 2;
 }
 
 .icon-button,
@@ -548,10 +542,6 @@ label {
 }
 
 @media (max-width: 640px) {
-  .window-bar {
-    height: 42px;
-  }
-
   .home-shell {
     width: min(100% - 24px, 1060px);
     padding-top: 42px;
@@ -564,7 +554,9 @@ label {
   }
 
   .home-actions {
-    position: static;
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
     justify-content: center;
   }
 

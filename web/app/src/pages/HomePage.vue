@@ -20,7 +20,86 @@ const query = ref('')
 const now = ref(new Date())
 let timer = 0
 
+const lunarMonths: Record<string, number> = {
+  正月: 1,
+  二月: 2,
+  三月: 3,
+  四月: 4,
+  五月: 5,
+  六月: 6,
+  七月: 7,
+  八月: 8,
+  九月: 9,
+  十月: 10,
+  十一月: 11,
+  冬月: 11,
+  十二月: 12,
+  腊月: 12
+}
+const lunarDays = [
+  '',
+  '初一',
+  '初二',
+  '初三',
+  '初四',
+  '初五',
+  '初六',
+  '初七',
+  '初八',
+  '初九',
+  '初十',
+  '十一',
+  '十二',
+  '十三',
+  '十四',
+  '十五',
+  '十六',
+  '十七',
+  '十八',
+  '十九',
+  '二十',
+  '廿一',
+  '廿二',
+  '廿三',
+  '廿四',
+  '廿五',
+  '廿六',
+  '廿七',
+  '廿八',
+  '廿九',
+  '三十'
+]
+const lunarFestivals: Record<string, string> = {
+  '1-1': '春节',
+  '1-15': '元宵节',
+  '2-2': '龙抬头',
+  '5-5': '端午节',
+  '7-7': '七夕',
+  '8-15': '中秋节',
+  '9-9': '重阳节',
+  '12-8': '腊八节',
+  '12-23': '北方小年',
+  '12-24': '南方小年'
+}
+const solarFestivals: Record<string, string> = {
+  '1-1': '元旦',
+  '5-1': '劳动节',
+  '5-4': '青年节',
+  '6-1': '儿童节',
+  '8-1': '建军节',
+  '9-10': '教师节',
+  '10-1': '国庆节'
+}
+
 const enabledEngines = computed(() => settings.settings.search.enabledSearchEngines)
+const dateTimeLabel = computed(() => {
+  const year = now.value.getFullYear()
+  const month = String(now.value.getMonth() + 1).padStart(2, '0')
+  const day = String(now.value.getDate()).padStart(2, '0')
+  const time = now.value.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  return `${year}.${month}.${day} ${time}`
+})
+const lunarLabel = computed(() => formatLunarDate(now.value))
 const filteredGroups = computed(() => {
   const keyword = query.value.trim().toLowerCase()
   if (!keyword) return navigation.groups
@@ -46,6 +125,21 @@ function submitSearch() {
   window.open(searchEngines[engine].url(keyword), '_blank', 'noreferrer')
 }
 
+function formatLunarDate(date: Date) {
+  const parts = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
+    month: 'long',
+    day: 'numeric'
+  }).formatToParts(date)
+  const monthName = parts.find(part => part.type === 'month')?.value || ''
+  const day = Number(parts.find(part => part.type === 'day')?.value || 0)
+  const lunarMonth = lunarMonths[monthName.replace('闰', '')]
+  const lunarDay = lunarDays[day] || `${day}日`
+  const solarKey = `${date.getMonth() + 1}-${date.getDate()}`
+  const lunarKey = `${lunarMonth}-${day}`
+  const festival = solarFestivals[solarKey] || lunarFestivals[lunarKey]
+  return `农历${monthName}${lunarDay}${festival ? ` · ${festival}` : ''}`
+}
+
 onMounted(async () => {
   await Promise.all([navigation.loadPublic(), settings.load()])
   const preferred = ui.searchEngine
@@ -67,17 +161,13 @@ watch(enabledEngines, engines => {
 
 <template>
   <main class="home-page" :class="ui.theme" :style="backgroundStyle">
-    <div class="window-bar">
-      <span></span><span></span><span></span>
-    </div>
-
     <section class="home-shell">
       <header class="home-header">
         <div class="title-block">
           <h1>{{ settings.settings.appearance.siteTitle }}</h1>
           <div class="clock">
-            <strong>{{ now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</strong>
-            <span>{{ now.toLocaleDateString() }}</span>
+            <strong>{{ dateTimeLabel }}</strong>
+            <span class="lunar">{{ lunarLabel }}</span>
           </div>
         </div>
         <div class="home-actions">
