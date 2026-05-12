@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue'
-import { Plus, Save, Trash2 } from 'lucide-vue-next'
+import { Plus, Save, Trash2, Upload } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
+import { api } from '../api/client'
 import type { NavLink } from '../api/types'
 import { useNavigationStore } from '../stores/navigation'
 import { useToastStore } from '../stores/toast'
@@ -62,6 +63,25 @@ async function saveLink(link: Parameters<typeof nav.saveLink>[0]) {
   toast.show(t('saveSuccess'))
 }
 
+async function uploadIcon(event: Event, link: Partial<NavLink>, saveAfterUpload = false) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  try {
+    const result = await api.upload(file)
+    link.icon = result.url
+    link.iconType = 'image'
+    if (saveAfterUpload && link.id) {
+      await nav.saveLink(link)
+      toast.show(t('saveSuccess'))
+    }
+  } catch (error) {
+    toast.show(error instanceof Error ? error.message : 'Upload failed', 'error')
+  } finally {
+    input.value = ''
+  }
+}
+
 async function deleteGroup(id: number) {
   await nav.deleteGroup(id)
   toast.show(t('deleteSuccess'))
@@ -100,7 +120,19 @@ async function deleteLink(id: number) {
         </label>
         <label>{{ t('title') }}<input v-model="newLink.title" /></label>
         <label>{{ t('url') }}<input v-model="newLink.url" placeholder="https://example.com" /></label>
-        <label>{{ t('icon') }}<input v-model="newLink.icon" /></label>
+        <label>{{ t('icon') }}
+          <div class="icon-field">
+            <select v-model="newLink.iconType">
+              <option value="text">Url</option>
+              <option value="image">Image</option>
+            </select>
+            <input v-model="newLink.icon" placeholder="/uploads/icon.png" />
+            <span class="upload-button icon-upload">
+              <Upload :size="18" />Upload
+              <input type="file" accept="image/*,.ico,.svg" @change="uploadIcon($event, newLink)" />
+            </span>
+          </div>
+        </label>
         <label>{{ t('description') }}<input v-model="newLink.description" /></label>
         <label>{{ t('sortOrder') }}<input v-model.number="newLink.sortOrder" type="number" /></label>
         <label class="check-row"><input v-model="newLink.visible" type="checkbox" />{{ t('visible') }}</label>
@@ -131,7 +163,17 @@ async function deleteLink(id: number) {
           </select>
           <input v-model="link.title" />
           <input v-model="link.url" />
-          <input v-model="link.icon" />
+          <div class="icon-field">
+            <select v-model="link.iconType">
+              <option value="text">Url</option>
+              <option value="image">Image</option>
+            </select>
+            <input v-model="link.icon" />
+            <span class="upload-button icon-upload" :title="t('icon')">
+              <Upload :size="18" />
+              <input type="file" accept="image/*,.ico,.svg" @change="uploadIcon($event, link, true)" />
+            </span>
+          </div>
           <input v-model="link.description" />
           <input v-model.number="link.sortOrder" type="number" />
           <label class="check-row"><input v-model="link.visible" type="checkbox" />{{ t('visible') }}</label>

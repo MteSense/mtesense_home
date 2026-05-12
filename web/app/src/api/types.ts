@@ -32,6 +32,7 @@ export interface AppearanceSettings {
   siteTitle: string
   browserTitle: string
   subtitle: string
+  footerHtml: string
   backgroundImage: string
   defaultTheme: ThemeName
   cardOpacity: number

@@ -58,6 +58,7 @@ async function upload(event: Event) {
         <label>{{ t('siteTitle') }}<input v-model="form.appearance.siteTitle" /></label>
         <label>{{ t('browserTitle') }}<input v-model="form.appearance.browserTitle" /></label>
         <label>{{ t('backgroundImage') }}<input v-model="form.appearance.backgroundImage" /></label>
+        <label class="wide-field">Footer HTML<textarea v-model="form.appearance.footerHtml" /></label>
         <label>{{ t('defaultTheme') }}
           <select v-model="form.appearance.defaultTheme">
             <option value="dark">Dark</option>

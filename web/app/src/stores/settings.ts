@@ -7,6 +7,7 @@ export const defaultSettings: PublicSettings = {
     siteTitle: 'MteSense',
     browserTitle: 'MteSense',
     subtitle: 'Personal navigation',
+    footerHtml: '© 2025 - 2026 MteSense Studio. All rights reserved.',
     backgroundImage: '',
     defaultTheme: 'dark',
     cardOpacity: 0.34,
@@ -38,6 +39,9 @@ export const useSettingsStore = defineStore('settings', {
         if (!settings.appearance.browserTitle) {
           settings.appearance.browserTitle = settings.appearance.siteTitle || defaultSettings.appearance.browserTitle
         }
+        if (!settings.appearance.footerHtml) {
+          settings.appearance.footerHtml = defaultSettings.appearance.footerHtml
+        }
         this.settings = settings
         syncDocumentTitle(this.settings)
       } catch (error) {
@@ -50,9 +54,15 @@ export const useSettingsStore = defineStore('settings', {
       if (!payload.appearance.browserTitle) {
         payload.appearance.browserTitle = payload.appearance.siteTitle || defaultSettings.appearance.browserTitle
       }
+      if (!payload.appearance.footerHtml) {
+        payload.appearance.footerHtml = defaultSettings.appearance.footerHtml
+      }
       const settings = await api.saveSettings(payload)
       if (!settings.appearance.browserTitle) {
         settings.appearance.browserTitle = settings.appearance.siteTitle || defaultSettings.appearance.browserTitle
+      }
+      if (!settings.appearance.footerHtml) {
+        settings.appearance.footerHtml = defaultSettings.appearance.footerHtml
       }
       this.settings = settings
       syncDocumentTitle(this.settings)

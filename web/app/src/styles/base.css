@@ -40,7 +40,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -50,7 +51,8 @@ a {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 42px;
   border: 1px solid var(--line);
@@ -59,6 +61,12 @@ select {
   color: var(--text);
   outline: none;
   padding: 0 12px;
+}
+
+textarea {
+  min-height: 96px;
+  padding: 10px 12px;
+  resize: vertical;
 }
 
 select option {
@@ -191,6 +199,25 @@ label {
   right: 22px;
   bottom: 22px;
   z-index: 2;
+}
+
+.home-footer {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 2;
+  width: min(680px, calc(100vw - 220px));
+  transform: translateX(-50%);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.home-footer a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .icon-button,
@@ -355,14 +382,14 @@ label {
 }
 
 .nav-icon.image {
-  padding: 7px;
+  padding: 0;
   background: rgba(255, 255, 255, 0.82);
 }
 
 .nav-icon img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .nav-copy {
@@ -530,6 +557,10 @@ label {
   grid-template-columns: 2fr 1fr auto auto;
 }
 
+.wide-field {
+  grid-column: 1 / -1;
+}
+
 .check-row {
   min-height: 42px;
   display: flex;
@@ -555,7 +586,7 @@ label {
 }
 
 .link-row {
-  grid-template-columns: 130px 1fr 1.5fr 90px 1.2fr 80px 110px 42px 42px;
+  grid-template-columns: 130px 1fr 1.5fr minmax(220px, 1.4fr) 1.2fr 80px 110px 42px 42px;
 }
 
 .upload-button {
@@ -568,6 +599,17 @@ label {
   inset: 0;
   opacity: 0;
   cursor: pointer;
+}
+
+.icon-field {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.icon-upload {
+  min-width: 42px;
+  white-space: nowrap;
 }
 
 @media (max-width: 980px) {
@@ -619,6 +661,12 @@ label {
     right: 12px;
     bottom: 12px;
     justify-content: center;
+  }
+
+  .home-footer {
+    width: min(100% - 132px, 680px);
+    bottom: 18px;
+    font-size: 12px;
   }
 
   .clock {

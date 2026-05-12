@@ -10,6 +10,7 @@ type Appearance struct {
 	SiteTitle    string  `json:"siteTitle"`
 	BrowserTitle string  `json:"browserTitle"`
 	Subtitle     string  `json:"subtitle"`
+	FooterHTML   string  `json:"footerHtml"`
 	Background   string  `json:"backgroundImage"`
 	DefaultTheme string  `json:"defaultTheme"`
 	CardOpacity  float64 `json:"cardOpacity"`
@@ -39,6 +40,7 @@ func (s *Service) GetPublic() (PublicSettings, error) {
 		SiteTitle:    "MteSense",
 		BrowserTitle: "MteSense",
 		Subtitle:     "Personal navigation",
+		FooterHTML:   "© 2025 - 2026 MteSense Studio. All rights reserved.",
 		DefaultTheme: "dark",
 		CardOpacity:  0.34,
 		BlurStrength: 18,
@@ -66,6 +68,9 @@ func (s *Service) SavePublic(settings PublicSettings) (PublicSettings, error) {
 	}
 	if settings.Appearance.BrowserTitle == "" {
 		settings.Appearance.BrowserTitle = settings.Appearance.SiteTitle
+	}
+	if settings.Appearance.FooterHTML == "" {
+		settings.Appearance.FooterHTML = "© 2025 - 2026 MteSense Studio. All rights reserved."
 	}
 	if settings.Appearance.DefaultTheme != "light" && settings.Appearance.DefaultTheme != "dark" {
 		settings.Appearance.DefaultTheme = "dark"

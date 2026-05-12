@@ -10,7 +10,7 @@ import { getToken } from '../api/client'
 import { searchEngines } from '../api/searchEngines'
 import type { SearchEngineId } from '../api/types'
 import { useNavigationStore } from '../stores/navigation'
-import { useSettingsStore } from '../stores/settings'
+import { defaultSettings, useSettingsStore } from '../stores/settings'
 import { useUiStore } from '../stores/ui'
 
 const navigation = useNavigationStore()
@@ -102,6 +102,7 @@ const dateTimeLabel = computed(() => {
   return `${year}.${month}.${day} ${time}`
 })
 const lunarLabel = computed(() => formatLunarDate(now.value))
+const footerHtml = computed(() => settings.settings.appearance.footerHtml || defaultSettings.appearance.footerHtml)
 const filteredGroups = computed(() => {
   const keyword = query.value.trim().toLowerCase()
   if (!keyword) return navigation.groups
@@ -195,5 +196,6 @@ watch(enabledEngines, engines => {
         </div>
       </section>
     </section>
+    <footer class="home-footer" v-html="footerHtml"></footer>
   </main>
 </template>
