@@ -80,6 +80,83 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mte
 
 注意：Linux 部署不需要 `mtesense-home.exe`。
 
+## Docker 部署
+
+Docker 部署支持两种模式：可以在本地或 VPS 上用源码直接构建运行，也可以先把镜像发布到 Docker Hub，再在任意 Linux VPS 上拉取运行。
+
+容器内默认路径：
+
+```text
+PORT=8080
+DATABASE_PATH=/app/data/app.db
+UPLOAD_DIR=/app/public_uploads
+```
+
+SQLite 数据和上传文件建议使用 Docker 卷持久化。首次启动时会根据 `ADMIN_USERNAME` / `ADMIN_PASSWORD` 创建管理员账号；如果用户已经存在，后续修改环境变量不会覆盖数据库里的密码。生产环境请务必修改 `JWT_SECRET`、`ADMIN_USERNAME` 和 `ADMIN_PASSWORD`。
+
+### 模式一：源码构建部署
+
+适合 VPS 上有项目源码的情况：
+
+```bash
+docker compose up -d --build
+```
+
+也可以不用 Compose，手动构建并运行：
+
+```bash
+docker build -t mtesense-home:local .
+
+docker run -d --name mtesense-home \
+  -p 8080:8080 \
+  -e JWT_SECRET=replace-with-a-long-random-secret \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_PASSWORD=admin123456 \
+  -v mtesense_data:/app/data \
+  -v mtesense_uploads:/app/public_uploads \
+  --restart unless-stopped \
+  mtesense-home:local
+```
+
+### 模式二：Docker Hub 镜像部署
+
+适合先构建并发布镜像，然后在任意 Linux VPS 上拉取即部署。先把 `your-dockerhub-name` 替换成自己的 Docker Hub 用户名或组织名：
+
+```bash
+docker build -t your-dockerhub-name/mtesense-home:latest .
+docker login
+docker push your-dockerhub-name/mtesense-home:latest
+```
+
+在 VPS 上直接运行：
+
+```bash
+docker run -d --name mtesense-home \
+  -p 8080:8080 \
+  -e JWT_SECRET=replace-with-a-long-random-secret \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_PASSWORD=admin123456 \
+  -v mtesense_data:/app/data \
+  -v mtesense_uploads:/app/public_uploads \
+  --restart unless-stopped \
+  your-dockerhub-name/mtesense-home:latest
+```
+
+或者编辑 `docker-compose.hub.yml`，把 `image` 改成自己的 Docker Hub 镜像名，然后运行：
+
+```bash
+docker compose -f docker-compose.hub.yml up -d
+```
+
+常用维护命令：
+
+```bash
+docker compose logs -f
+docker compose down
+docker compose pull
+docker compose up -d
+```
+
 ## systemd 部署
 
 示例以 `/opt/mtesense-home` 为部署目录：

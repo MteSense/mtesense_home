@@ -1,0 +1,14 @@
+.git/
+.cache/
+release/
+mtesense-home
+
+.env
+
+data/*.db
+data/*.db-*
+public_uploads/*
+!public_uploads/.gitkeep
+
+web/app/node_modules/
+web/app/dist/

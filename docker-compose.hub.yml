@@ -1,0 +1,21 @@
+services:
+  mtesense-home:
+    image: your-dockerhub-name/mtesense-home:latest
+    container_name: mtesense-home
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      DATABASE_PATH: "/app/data/app.db"
+      UPLOAD_DIR: "/app/public_uploads"
+      JWT_SECRET: "${JWT_SECRET:-replace-with-a-long-random-secret}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin123456}"
+    volumes:
+      - mtesense_data:/app/data
+      - mtesense_uploads:/app/public_uploads
+
+volumes:
+  mtesense_data:
+  mtesense_uploads:
