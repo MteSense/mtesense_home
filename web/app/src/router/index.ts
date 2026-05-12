@@ -33,4 +33,37 @@ router.beforeEach(to => {
   }
 })
 
+router.afterEach(to => {
+  syncRobotsMeta(to.path.startsWith('/admin'))
+  syncCanonicalLink(!to.path.startsWith('/admin'))
+})
+
+function syncRobotsMeta(noindex: boolean) {
+  let tag = document.querySelector<HTMLMetaElement>('meta[name="robots"]')
+  if (!noindex) {
+    tag?.remove()
+    return
+  }
+  if (!tag) {
+    tag = document.createElement('meta')
+    tag.name = 'robots'
+    document.head.appendChild(tag)
+  }
+  tag.content = 'noindex,nofollow'
+}
+
+function syncCanonicalLink(enabled: boolean) {
+  let tag = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  if (!enabled) {
+    tag?.remove()
+    return
+  }
+  if (!tag) {
+    tag = document.createElement('link')
+    tag.rel = 'canonical'
+    document.head.appendChild(tag)
+  }
+  tag.href = `${window.location.origin}/`
+}
+
 export default router

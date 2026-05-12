@@ -28,6 +28,7 @@ WORKDIR /app
 ENV PORT=8080
 ENV DATABASE_PATH=/app/data/app.db
 ENV UPLOAD_DIR=/app/public_uploads
+ENV PUBLIC_SITE_URL=
 
 RUN mkdir -p /app/data /app/public_uploads /app/web/app/dist
 

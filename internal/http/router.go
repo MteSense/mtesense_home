@@ -2,7 +2,9 @@ package httpapi
 
 import (
 	"database/sql"
+	"encoding/xml"
 	"errors"
+	"html"
 	"io/fs"
 	"net/http"
 	"os"
@@ -45,6 +47,7 @@ func NewRouter(cfg config.Config, database *sql.DB) http.Handler {
 	r.Use(cors)
 
 	r.Route("/api/v1", func(api chi.Router) {
+		api.Use(noindex)
 		api.Get("/health", server.health)
 		api.Post("/auth/login", server.login)
 		api.Get("/navigation", server.publicNavigation)
@@ -68,8 +71,10 @@ func NewRouter(cfg config.Config, database *sql.DB) http.Handler {
 		})
 	})
 
-	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir(cfg.UploadDir))))
-	r.NotFound(spaHandler(filepath.Join("web", "app", "dist")))
+	r.Get("/robots.txt", server.robots)
+	r.Get("/sitemap.xml", server.sitemap)
+	r.Handle("/uploads/*", noindex(http.StripPrefix("/uploads/", http.FileServer(http.Dir(cfg.UploadDir)))))
+	r.NotFound(server.spaHandler(filepath.Join("web", "app", "dist")))
 	return r
 }
 
@@ -90,6 +95,13 @@ func cors(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func noindex(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Robots-Tag", "noindex, nofollow")
 		next.ServeHTTP(w, r)
 	})
 }
@@ -315,6 +327,36 @@ func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, saved)
 }
 
+func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
+	baseURL := s.publicBaseURL(r)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte("User-agent: *\nAllow: /\n\nSitemap: " + baseURL + "/sitemap.xml\n"))
+}
+
+func (s *Server) sitemap(w http.ResponseWriter, r *http.Request) {
+	type urlEntry struct {
+		Loc string `xml:"loc"`
+	}
+	type urlSet struct {
+		XMLName xml.Name   `xml:"urlset"`
+		XMLNS   string     `xml:"xmlns,attr"`
+		URLs    []urlEntry `xml:"url"`
+	}
+
+	body, err := xml.MarshalIndent(urlSet{
+		XMLNS: "http://www.sitemaps.org/schemas/sitemap/0.9",
+		URLs:  []urlEntry{{Loc: s.publicBaseURL(r) + "/"}},
+	}, "", "  ")
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "build sitemap")
+		return
+	}
+	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+	_, _ = w.Write([]byte(xml.Header))
+	_, _ = w.Write(body)
+	_, _ = w.Write([]byte("\n"))
+}
+
 func paramID(w http.ResponseWriter, r *http.Request) (int64, bool) {
 	raw := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(raw, 10, 64)
@@ -341,7 +383,7 @@ func validateLink(link nav.Link) error {
 	return nil
 }
 
-func spaHandler(dist string) http.HandlerFunc {
+func (s *Server) spaHandler(dist string) http.HandlerFunc {
 	fileServer := http.FileServer(http.Dir(dist))
 	return func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/") {
@@ -361,9 +403,118 @@ func spaHandler(dist string) http.HandlerFunc {
 			return
 		}
 		if _, err := fs.Stat(os.DirFS(dist), "index.html"); err == nil {
-			http.ServeFile(w, r, indexPath)
+			s.serveIndex(w, r, indexPath)
 			return
 		}
 		writeError(w, http.StatusNotFound, "not found")
 	}
+}
+
+func (s *Server) serveIndex(w http.ResponseWriter, r *http.Request, indexPath string) {
+	if strings.HasPrefix(r.URL.Path, "/admin") {
+		w.Header().Set("X-Robots-Tag", "noindex, nofollow")
+	}
+
+	indexHTML, err := os.ReadFile(indexPath)
+	if err != nil {
+		http.ServeFile(w, r, indexPath)
+		return
+	}
+
+	settings, err := s.settings.GetPublic()
+	if err != nil {
+		http.ServeFile(w, r, indexPath)
+		return
+	}
+
+	title := strings.TrimSpace(settings.Appearance.BrowserTitle)
+	if title == "" {
+		title = strings.TrimSpace(settings.Appearance.SiteTitle)
+	}
+	if title == "" {
+		title = "MteSense"
+	}
+	description := strings.TrimSpace(settings.Appearance.Subtitle)
+	if description == "" {
+		description = "Personal navigation"
+	}
+
+	body := string(indexHTML)
+	body = replaceTitle(body, title)
+	body = injectHeadTags(body, buildSEOTags(title, description, s.publicBaseURL(r), strings.HasPrefix(r.URL.Path, "/admin")))
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(body))
+}
+
+func replaceTitle(document string, title string) string {
+	start := strings.Index(document, "<title>")
+	end := strings.Index(document, "</title>")
+	if start == -1 || end == -1 || end < start {
+		return document
+	}
+	return document[:start] + "<title>" + html.EscapeString(title) + "</title>" + document[end+len("</title>"):]
+}
+
+func injectHeadTags(document string, tags string) string {
+	headEnd := strings.Index(document, "</head>")
+	if headEnd == -1 {
+		return document
+	}
+	return document[:headEnd] + tags + document[headEnd:]
+}
+
+func buildSEOTags(title, description, baseURL string, noindex bool) string {
+	canonical := baseURL + "/"
+	var b strings.Builder
+	b.WriteString("    <meta name=\"description\" content=\"")
+	b.WriteString(html.EscapeString(description))
+	b.WriteString("\" />\n")
+	if noindex {
+		b.WriteString("    <meta name=\"robots\" content=\"noindex,nofollow\" />\n")
+	} else {
+		b.WriteString("    <link rel=\"canonical\" href=\"")
+		b.WriteString(html.EscapeString(canonical))
+		b.WriteString("\" />\n")
+	}
+	b.WriteString("    <meta property=\"og:type\" content=\"website\" />\n")
+	b.WriteString("    <meta property=\"og:title\" content=\"")
+	b.WriteString(html.EscapeString(title))
+	b.WriteString("\" />\n")
+	b.WriteString("    <meta property=\"og:description\" content=\"")
+	b.WriteString(html.EscapeString(description))
+	b.WriteString("\" />\n")
+	b.WriteString("    <meta property=\"og:url\" content=\"")
+	b.WriteString(html.EscapeString(canonical))
+	b.WriteString("\" />\n")
+	b.WriteString("    <meta name=\"twitter:card\" content=\"summary\" />\n")
+	return b.String()
+}
+
+func (s *Server) publicBaseURL(r *http.Request) string {
+	if configured := strings.TrimRight(strings.TrimSpace(s.cfg.PublicSiteURL), "/"); configured != "" {
+		return configured
+	}
+	proto := forwardedValue(r.Header.Get("X-Forwarded-Proto"))
+	if proto == "" {
+		if r.TLS != nil {
+			proto = "https"
+		} else {
+			proto = "http"
+		}
+	}
+	host := forwardedValue(r.Header.Get("X-Forwarded-Host"))
+	if host == "" {
+		host = r.Host
+	}
+	return proto + "://" + strings.TrimRight(host, "/")
+}
+
+func forwardedValue(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return ""
+	}
+	parts := strings.Split(value, ",")
+	return strings.TrimSpace(parts[0])
 }

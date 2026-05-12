@@ -64,6 +64,7 @@ deploy/systemd/mtesense-home.service # systemd 服务示例
 PORT=8080
 DATABASE_PATH=data/app.db
 UPLOAD_DIR=public_uploads
+PUBLIC_SITE_URL=https://example.com
 JWT_SECRET=replace-with-a-long-random-secret
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=admin123456

@@ -10,6 +10,7 @@ type Config struct {
 	Port          string
 	DatabasePath  string
 	UploadDir     string
+	PublicSiteURL string
 	JWTSecret     string
 	AdminUsername string
 	AdminPassword string
@@ -20,6 +21,7 @@ func Load() Config {
 		Port:          env("PORT", "8080"),
 		DatabasePath:  env("DATABASE_PATH", filepath.Join("data", "app.db")),
 		UploadDir:     env("UPLOAD_DIR", "public_uploads"),
+		PublicSiteURL: env("PUBLIC_SITE_URL", ""),
 		JWTSecret:     env("JWT_SECRET", "change-this-secret-in-production"),
 		AdminUsername: env("ADMIN_USERNAME", "admin"),
 		AdminPassword: env("ADMIN_PASSWORD", "admin123456"),
