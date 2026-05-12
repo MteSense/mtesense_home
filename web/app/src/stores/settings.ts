@@ -5,6 +5,7 @@ import type { PublicSettings } from '../api/types'
 export const defaultSettings: PublicSettings = {
   appearance: {
     siteTitle: 'MteSense',
+    browserTitle: 'MteSense',
     subtitle: 'Personal navigation',
     backgroundImage: '',
     defaultTheme: 'dark',
@@ -15,6 +16,11 @@ export const defaultSettings: PublicSettings = {
     defaultSearchEngine: 'google',
     enabledSearchEngines: ['google', 'bing', 'baidu']
   }
+}
+
+function syncDocumentTitle(settings: PublicSettings) {
+  document.title =
+    settings.appearance.browserTitle || settings.appearance.siteTitle || defaultSettings.appearance.browserTitle
 }
 
 export const useSettingsStore = defineStore('settings', {
@@ -28,7 +34,12 @@ export const useSettingsStore = defineStore('settings', {
       this.loading = true
       this.error = ''
       try {
-        this.settings = await api.settings()
+        const settings = await api.settings()
+        if (!settings.appearance.browserTitle) {
+          settings.appearance.browserTitle = settings.appearance.siteTitle || defaultSettings.appearance.browserTitle
+        }
+        this.settings = settings
+        syncDocumentTitle(this.settings)
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Failed to load settings'
       } finally {
@@ -36,7 +47,15 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
     async save(payload: PublicSettings) {
-      this.settings = await api.saveSettings(payload)
+      if (!payload.appearance.browserTitle) {
+        payload.appearance.browserTitle = payload.appearance.siteTitle || defaultSettings.appearance.browserTitle
+      }
+      const settings = await api.saveSettings(payload)
+      if (!settings.appearance.browserTitle) {
+        settings.appearance.browserTitle = settings.appearance.siteTitle || defaultSettings.appearance.browserTitle
+      }
+      this.settings = settings
+      syncDocumentTitle(this.settings)
     }
   }
 })

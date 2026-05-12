@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
 INSERT INTO settings (key, value_json)
 VALUES
-  ('appearance', '{"siteTitle":"MteSense","subtitle":"Personal navigation","backgroundImage":"","defaultTheme":"dark","cardOpacity":0.34,"blurStrength":18}'),
+  ('appearance', '{"siteTitle":"MteSense","browserTitle":"MteSense","subtitle":"Personal navigation","backgroundImage":"","defaultTheme":"dark","cardOpacity":0.34,"blurStrength":18}'),
   ('search', '{"defaultSearchEngine":"google","enabledSearchEngines":["google","bing","baidu"]}')
 ON CONFLICT(key) DO NOTHING;
 

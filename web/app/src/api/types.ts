@@ -30,6 +30,7 @@ export interface NavLink {
 
 export interface AppearanceSettings {
   siteTitle: string
+  browserTitle: string
   subtitle: string
   backgroundImage: string
   defaultTheme: ThemeName

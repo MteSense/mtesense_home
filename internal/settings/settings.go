@@ -8,6 +8,7 @@ import (
 
 type Appearance struct {
 	SiteTitle    string  `json:"siteTitle"`
+	BrowserTitle string  `json:"browserTitle"`
 	Subtitle     string  `json:"subtitle"`
 	Background   string  `json:"backgroundImage"`
 	DefaultTheme string  `json:"defaultTheme"`
@@ -36,6 +37,7 @@ func NewService(db *sql.DB) *Service {
 func (s *Service) GetPublic() (PublicSettings, error) {
 	appearance := Appearance{
 		SiteTitle:    "MteSense",
+		BrowserTitle: "MteSense",
 		Subtitle:     "Personal navigation",
 		DefaultTheme: "dark",
 		CardOpacity:  0.34,
@@ -48,6 +50,9 @@ func (s *Service) GetPublic() (PublicSettings, error) {
 	if err := s.getJSON("appearance", &appearance); err != nil {
 		return PublicSettings{}, err
 	}
+	if appearance.BrowserTitle == "" {
+		appearance.BrowserTitle = appearance.SiteTitle
+	}
 	if err := s.getJSON("search", &search); err != nil {
 		return PublicSettings{}, err
 	}
@@ -58,6 +63,9 @@ func (s *Service) SavePublic(settings PublicSettings) (PublicSettings, error) {
 	settings.Search = normalizeSearch(settings.Search)
 	if settings.Appearance.SiteTitle == "" {
 		settings.Appearance.SiteTitle = "MteSense"
+	}
+	if settings.Appearance.BrowserTitle == "" {
+		settings.Appearance.BrowserTitle = settings.Appearance.SiteTitle
 	}
 	if settings.Appearance.DefaultTheme != "light" && settings.Appearance.DefaultTheme != "dark" {
 		settings.Appearance.DefaultTheme = "dark"

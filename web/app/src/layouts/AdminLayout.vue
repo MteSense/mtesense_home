@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import LanguageToggle from '../components/LanguageToggle.vue'
+import ToastHost from '../components/ToastHost.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -18,8 +19,12 @@ function logout() {
 
 <template>
   <div class="admin-layout">
+    <ToastHost />
     <aside class="admin-sidebar">
-      <RouterLink class="brand-mini" to="/">MteSense</RouterLink>
+      <RouterLink class="brand-mini" to="/">
+        <span>MteSense</span>
+        <img src="/favicon.ico" alt="" />
+      </RouterLink>
       <nav>
         <RouterLink to="/admin/links"><LayoutGrid :size="18" />{{ t('links') }}</RouterLink>
         <RouterLink to="/admin/appearance"><Palette :size="18" />{{ t('appearance') }}</RouterLink>

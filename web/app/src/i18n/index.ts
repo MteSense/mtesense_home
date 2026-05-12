@@ -14,6 +14,11 @@ const messages = {
     dashboard: '概览',
     addGroup: '添加分组',
     addLink: '添加链接',
+    group: '分组',
+    groupList: '分组',
+    linkList: '链接标签',
+    groupsCount: '分组',
+    linksCount: '链接标签',
     save: '保存',
     delete: '删除',
     edit: '编辑',
@@ -26,10 +31,15 @@ const messages = {
     sortOrder: '排序',
     openInNewTab: '新窗口打开',
     siteTitle: '站点标题',
+    browserTitle: '浏览器标签',
     subtitle: '副标题',
     backgroundImage: '背景图',
+    uploadBackground: '上传背景图片',
     defaultTheme: '默认主题',
-    searchEngine: '搜索引擎'
+    searchEngine: '搜索引擎',
+    saveSuccess: '保存成功',
+    addSuccess: '添加成功',
+    deleteSuccess: '删除成功'
   },
   en: {
     searchPlaceholder: 'Enter search content',
@@ -44,6 +54,11 @@ const messages = {
     dashboard: 'Dashboard',
     addGroup: 'Add group',
     addLink: 'Add link',
+    group: 'Group',
+    groupList: 'Groups',
+    linkList: 'Links',
+    groupsCount: 'groups',
+    linksCount: 'links',
     save: 'Save',
     delete: 'Delete',
     edit: 'Edit',
@@ -56,10 +71,15 @@ const messages = {
     sortOrder: 'Order',
     openInNewTab: 'Open in new tab',
     siteTitle: 'Site title',
+    browserTitle: 'Browser tab title',
     subtitle: 'Subtitle',
     backgroundImage: 'Background image',
+    uploadBackground: 'Upload background',
     defaultTheme: 'Default theme',
-    searchEngine: 'Search engine'
+    searchEngine: 'Search engine',
+    saveSuccess: 'Saved',
+    addSuccess: 'Added',
+    deleteSuccess: 'Deleted'
   }
 }
 

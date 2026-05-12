@@ -25,6 +25,9 @@ const router = createRouter({
 })
 
 router.beforeEach(to => {
+  if (to.path === '/admin/login' && getToken()) {
+    return '/admin/links'
+  }
   if (to.meta.auth && !getToken()) {
     return '/admin/login'
   }

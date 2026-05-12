@@ -1,25 +1,40 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, watch } from 'vue'
 import { Save, Upload } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { api } from '../api/client'
 import type { PublicSettings, SearchEngineId } from '../api/types'
 import { searchEngines } from '../api/searchEngines'
 import { defaultSettings, useSettingsStore } from '../stores/settings'
+import { useToastStore } from '../stores/toast'
 
 const settingsStore = useSettingsStore()
+const toast = useToastStore()
 const { t } = useI18n()
-const form = reactive<PublicSettings>(structuredClone(defaultSettings))
 const engines = Object.keys(searchEngines) as SearchEngineId[]
+
+function cloneSettings(settings: PublicSettings) {
+  return JSON.parse(JSON.stringify(settings)) as PublicSettings
+}
+
+const form = reactive<PublicSettings>(cloneSettings(defaultSettings))
 
 onMounted(async () => {
   await settingsStore.load()
-  Object.assign(form, structuredClone(settingsStore.settings))
+  Object.assign(form, cloneSettings(settingsStore.settings))
 })
 
+watch(
+  () => form.appearance.browserTitle,
+  title => {
+    document.title = title || form.appearance.siteTitle || defaultSettings.appearance.browserTitle
+  }
+)
+
 async function save() {
-  await settingsStore.save(form)
-  Object.assign(form, structuredClone(settingsStore.settings))
+  await settingsStore.save(cloneSettings(form))
+  Object.assign(form, cloneSettings(settingsStore.settings))
+  toast.show(t('saveSuccess'))
 }
 
 async function upload(event: Event) {
@@ -41,7 +56,7 @@ async function upload(event: Event) {
     <section class="tool-panel">
       <div class="form-grid">
         <label>{{ t('siteTitle') }}<input v-model="form.appearance.siteTitle" /></label>
-        <label>{{ t('subtitle') }}<input v-model="form.appearance.subtitle" /></label>
+        <label>{{ t('browserTitle') }}<input v-model="form.appearance.browserTitle" /></label>
         <label>{{ t('backgroundImage') }}<input v-model="form.appearance.backgroundImage" /></label>
         <label>{{ t('defaultTheme') }}
           <select v-model="form.appearance.defaultTheme">
@@ -69,7 +84,7 @@ async function upload(event: Event) {
 
       <div class="form-actions">
         <label class="upload-button">
-          <Upload :size="18" />Upload background
+          <Upload :size="18" />{{ t('uploadBackground') }}
           <input type="file" accept="image/*,.svg" @change="upload" />
         </label>
         <button class="primary-button" type="button" @click="save"><Save :size="18" />{{ t('save') }}</button>

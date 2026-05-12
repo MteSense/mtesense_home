@@ -6,6 +6,7 @@ import NavCard from '../components/NavCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import LanguageToggle from '../components/LanguageToggle.vue'
+import { getToken } from '../api/client'
 import { searchEngines } from '../api/searchEngines'
 import type { SearchEngineId } from '../api/types'
 import { useNavigationStore } from '../stores/navigation'
@@ -92,6 +93,7 @@ const solarFestivals: Record<string, string> = {
 }
 
 const enabledEngines = computed(() => settings.settings.search.enabledSearchEngines)
+const adminPath = computed(() => (getToken() ? '/admin/links' : '/admin/login'))
 const dateTimeLabel = computed(() => {
   const year = now.value.getFullYear()
   const month = String(now.value.getMonth() + 1).padStart(2, '0')
@@ -171,7 +173,7 @@ watch(enabledEngines, engines => {
           </div>
         </div>
         <div class="home-actions">
-          <RouterLink class="icon-button" to="/admin/login" :title="t('admin')"><Settings :size="18" /></RouterLink>
+          <RouterLink class="icon-button" :to="adminPath" :title="t('admin')"><Settings :size="18" /></RouterLink>
           <LanguageToggle />
           <ThemeToggle />
         </div>
