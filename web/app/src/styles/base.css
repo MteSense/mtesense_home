@@ -89,6 +89,17 @@ label {
     radial-gradient(circle at 88% 36%, rgba(100, 145, 224, 0.7), transparent 34%),
     linear-gradient(135deg, #12064a 0%, #0b0534 48%, #2a045f 100%);
   background-size: cover;
+}
+
+.home-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.login-page {
   overflow: hidden;
 }
 
@@ -122,6 +133,7 @@ label {
 .home-shell {
   position: relative;
   z-index: 1;
+  flex: 1 0 auto;
   width: min(1060px, calc(100vw - 40px));
   margin: 0 auto;
   padding: 108px 0 70px;
@@ -202,12 +214,10 @@ label {
 }
 
 .home-footer {
-  position: fixed;
-  left: 50%;
-  bottom: 26px;
+  position: relative;
   z-index: 2;
   width: min(680px, calc(100vw - 220px));
-  transform: translateX(-50%);
+  margin: 0 auto 26px;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
@@ -665,7 +675,7 @@ label {
 
   .home-footer {
     width: min(100% - 132px, 680px);
-    bottom: 18px;
+    margin-bottom: 18px;
     font-size: 12px;
   }
 

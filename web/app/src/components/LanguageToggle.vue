@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Languages } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { useUiStore } from '../stores/ui'
 
@@ -15,7 +14,6 @@ function toggleLocale() {
 
 <template>
   <button class="icon-button" type="button" title="Language" @click="toggleLocale">
-    <Languages :size="18" />
-    <span>{{ ui.locale === 'zh' ? 'EN' : '中' }}</span>
+    <span>{{ ui.locale === 'zh' ? 'EN' : '中文' }}</span>
   </button>
 </template>

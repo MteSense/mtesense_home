@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { Settings } from 'lucide-vue-next'
+import { Github, Settings } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import NavCard from '../components/NavCard.vue'
 import SearchBar from '../components/SearchBar.vue'
@@ -175,6 +175,15 @@ watch(enabledEngines, engines => {
         </div>
         <div class="home-actions">
           <RouterLink class="icon-button" :to="adminPath" :title="t('admin')"><Settings :size="18" /></RouterLink>
+          <a
+            class="icon-button"
+            href="https://github.com/MteSense/mtesense_home.git"
+            title="GitHub"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Github :size="18" />
+          </a>
           <LanguageToggle />
           <ThemeToggle />
         </div>
