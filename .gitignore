@@ -1,4 +1,5 @@
 .cache/
+.codex/
 release/
 mtesense-home
 data/*.db
