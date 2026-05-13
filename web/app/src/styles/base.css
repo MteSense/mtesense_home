@@ -378,6 +378,33 @@ label {
   background: var(--bg-strong);
 }
 
+.nav-card.is-admin-draggable {
+  cursor: grab;
+}
+
+.nav-card.is-admin-draggable:active {
+  cursor: grabbing;
+}
+
+.nav-card.is-dragging {
+  opacity: 0.45;
+  transform: scale(0.98);
+}
+
+.nav-card.drop-target,
+.nav-grid.drop-target {
+  border-color: rgba(22, 200, 255, 0.95);
+  box-shadow: 0 0 0 2px rgba(22, 200, 255, 0.22), var(--shadow);
+}
+
+.nav-grid.drop-target {
+  border-radius: 8px;
+}
+
+.home-page.is-reordering .nav-card {
+  pointer-events: none;
+}
+
 .nav-icon {
   width: 40px;
   height: 40px;

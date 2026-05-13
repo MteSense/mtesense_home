@@ -6,19 +6,28 @@ import NavCard from '../components/NavCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import LanguageToggle from '../components/LanguageToggle.vue'
-import { getToken } from '../api/client'
+import ToastHost from '../components/ToastHost.vue'
+import { api, getToken } from '../api/client'
 import { searchEngines } from '../api/searchEngines'
-import type { SearchEngineId } from '../api/types'
+import type { NavGroup, NavLink, SearchEngineId } from '../api/types'
 import { useNavigationStore } from '../stores/navigation'
 import { defaultSettings, useSettingsStore } from '../stores/settings'
+import { useToastStore } from '../stores/toast'
 import { useUiStore } from '../stores/ui'
 
 const navigation = useNavigationStore()
 const settings = useSettingsStore()
+const toast = useToastStore()
 const ui = useUiStore()
 const { t, locale } = useI18n()
 const query = ref('')
 const now = ref(new Date())
+const isAdmin = ref(false)
+const isReordering = ref(false)
+const draggedLinkId = ref<number | null>(null)
+const dropGroupId = ref<number | null>(null)
+const dropLinkId = ref<number | null>(null)
+const suppressCardClick = ref(false)
 let timer = 0
 
 const lunarMonths: Record<string, number> = {
@@ -94,6 +103,7 @@ const solarFestivals: Record<string, string> = {
 
 const enabledEngines = computed(() => settings.settings.search.enabledSearchEngines)
 const adminPath = computed(() => (getToken() ? '/admin/links' : '/admin/login'))
+const canReorder = computed(() => isAdmin.value && !query.value.trim())
 const dateTimeLabel = computed(() => {
   const year = now.value.getFullYear()
   const month = String(now.value.getMonth() + 1).padStart(2, '0')
@@ -128,6 +138,147 @@ function submitSearch() {
   window.open(searchEngines[engine].url(keyword), '_blank', 'noreferrer')
 }
 
+async function verifyAdminAccess() {
+  if (!getToken()) {
+    isAdmin.value = false
+    return
+  }
+  try {
+    const user = await api.me()
+    isAdmin.value = user.role === 'admin'
+  } catch {
+    isAdmin.value = false
+  }
+}
+
+function cloneGroups(groups: NavGroup[]) {
+  return groups.map(group => ({
+    ...group,
+    links: group.links.map(link => ({ ...link }))
+  }))
+}
+
+function normalizeLinkOrder(groups: NavGroup[]) {
+  for (const group of groups) {
+    group.links.forEach((link, index) => {
+      link.groupId = group.id
+      link.sortOrder = (index + 1) * 10
+    })
+  }
+}
+
+function moveLink(groups: NavGroup[], linkId: number, targetGroupId: number, beforeLinkId: number | null) {
+  let movedLink: NavLink | null = null
+  for (const group of groups) {
+    const linkIndex = group.links.findIndex(link => link.id === linkId)
+    if (linkIndex >= 0) {
+      movedLink = group.links.splice(linkIndex, 1)[0]
+      break
+    }
+  }
+  if (!movedLink) return false
+
+  const targetGroup = groups.find(group => group.id === targetGroupId)
+  if (!targetGroup) return false
+
+  const beforeIndex = beforeLinkId ? targetGroup.links.findIndex(link => link.id === beforeLinkId) : -1
+  const targetIndex = beforeIndex >= 0 ? beforeIndex : targetGroup.links.length
+  targetGroup.links.splice(targetIndex, 0, movedLink)
+  normalizeLinkOrder(groups)
+  return true
+}
+
+function changedLinks(before: NavGroup[], after: NavGroup[]) {
+  const original = new Map<number, Pick<NavLink, 'groupId' | 'sortOrder'>>()
+  before.forEach(group => {
+    group.links.forEach(link => original.set(link.id, { groupId: link.groupId, sortOrder: link.sortOrder }))
+  })
+  return after
+    .flatMap(group => group.links)
+    .filter(link => {
+      const previous = original.get(link.id)
+      return previous && (previous.groupId !== link.groupId || previous.sortOrder !== link.sortOrder)
+    })
+}
+
+function startLinkDrag(event: DragEvent, link: NavLink) {
+  if (!canReorder.value || isReordering.value) {
+    event.preventDefault()
+    return
+  }
+  draggedLinkId.value = link.id
+  dropGroupId.value = link.groupId
+  dropLinkId.value = link.id
+  event.dataTransfer?.setData('text/plain', String(link.id))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+
+function markDropTarget(event: DragEvent, groupId: number, linkId: number | null = null) {
+  if (!draggedLinkId.value || !canReorder.value) return
+  event.preventDefault()
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+  dropGroupId.value = groupId
+  dropLinkId.value = linkId
+}
+
+async function dropLink(event: DragEvent, targetGroupId: number, beforeLinkId: number | null = null) {
+  event.preventDefault()
+  if (!draggedLinkId.value || !canReorder.value || isReordering.value) return
+  if (draggedLinkId.value === beforeLinkId) {
+    clearDragState()
+    return
+  }
+
+  const before = cloneGroups(navigation.groups)
+  const after = cloneGroups(navigation.groups)
+  if (!moveLink(after, draggedLinkId.value, targetGroupId, beforeLinkId)) {
+    clearDragState()
+    return
+  }
+
+  const updates = changedLinks(before, after)
+  if (!updates.length) {
+    clearDragState()
+    return
+  }
+
+  isReordering.value = true
+  navigation.groups = after
+  try {
+    await Promise.all(updates.map(link => api.updateLink(link.id, link)))
+    toast.show(t('saveSuccess'))
+    await navigation.loadPublic()
+  } catch (error) {
+    navigation.groups = before
+    toast.show(error instanceof Error ? error.message : 'Failed to save order', 'error')
+  } finally {
+    isReordering.value = false
+    clearDragState(true)
+  }
+}
+
+function clearDragState(blockClick = false) {
+  draggedLinkId.value = null
+  dropGroupId.value = null
+  dropLinkId.value = null
+  if (blockClick) {
+    suppressCardClick.value = true
+    window.setTimeout(() => {
+      suppressCardClick.value = false
+    }, 0)
+  }
+}
+
+function endLinkDrag() {
+  clearDragState(true)
+}
+
+function handleNavClick(event: MouseEvent) {
+  if (suppressCardClick.value) {
+    event.preventDefault()
+  }
+}
+
 function formatLunarDate(date: Date) {
   const parts = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
     month: 'long',
@@ -144,7 +295,7 @@ function formatLunarDate(date: Date) {
 }
 
 onMounted(async () => {
-  await Promise.all([navigation.loadPublic(), settings.load()])
+  await Promise.all([navigation.loadPublic(), settings.load(), verifyAdminAccess()])
   const preferred = ui.searchEngine
   const fallback = settings.settings.search.defaultSearchEngine
   ui.setSearchEngine(enabledEngines.value.includes(preferred) ? preferred : fallback)
@@ -163,7 +314,8 @@ watch(enabledEngines, engines => {
 </script>
 
 <template>
-  <main class="home-page" :class="ui.theme" :style="backgroundStyle">
+  <main class="home-page" :class="[ui.theme, { 'can-reorder': canReorder, 'is-reordering': isReordering }]" :style="backgroundStyle">
+    <ToastHost />
     <section class="home-shell">
       <header class="home-header">
         <div class="title-block">
@@ -200,8 +352,28 @@ watch(enabledEngines, engines => {
 
       <section v-for="group in filteredGroups" :key="group.id" class="nav-section">
         <h2>{{ group.title }}</h2>
-        <div class="nav-grid">
-          <NavCard v-for="link in group.links" :key="link.id" :link="link" />
+        <div
+          class="nav-grid"
+          :class="{ 'drop-target': dropGroupId === group.id && dropLinkId === null }"
+          @dragover="markDropTarget($event, group.id)"
+          @drop="dropLink($event, group.id)"
+        >
+          <NavCard
+            v-for="link in group.links"
+            :key="link.id"
+            :link="link"
+            :class="{
+              'is-admin-draggable': canReorder,
+              'is-dragging': draggedLinkId === link.id,
+              'drop-target': dropGroupId === group.id && dropLinkId === link.id && draggedLinkId !== link.id
+            }"
+            :draggable="canReorder"
+            @click="handleNavClick"
+            @dragstart="startLinkDrag($event, link)"
+            @dragover.stop="markDropTarget($event, group.id, link.id)"
+            @drop.stop="dropLink($event, group.id, link.id)"
+            @dragend="endLinkDrag"
+          />
         </div>
       </section>
     </section>
