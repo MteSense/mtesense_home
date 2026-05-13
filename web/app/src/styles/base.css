@@ -197,7 +197,6 @@ label {
 
 .home-actions,
 .login-actions,
-.admin-sidebar-actions,
 .form-actions,
 .engine-checks {
   display: flex;
@@ -528,6 +527,22 @@ label {
   background: var(--bg-strong);
 }
 
+.admin-sidebar-actions {
+  position: fixed;
+  left: 22px;
+  top: 50%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  transform: translateY(-50%);
+}
+
+.admin-sidebar-actions .icon-button {
+  flex: 0 0 auto;
+}
+
 .admin-content {
   padding: 32px;
   overflow: auto;
@@ -699,5 +714,10 @@ label {
 
   .admin-sidebar {
     padding: 16px;
+  }
+
+  .admin-sidebar-actions {
+    left: 12px;
+    gap: 8px;
   }
 }

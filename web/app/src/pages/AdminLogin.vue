@@ -12,7 +12,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const settings = useSettingsStore()
 const { t } = useI18n()
-const form = reactive({ username: 'admin', password: '' })
+const form = reactive({ username: '', password: '' })
 
 const backgroundStyle = computed(() => {
   const image = settings.settings.appearance.backgroundImage
@@ -37,7 +37,7 @@ onMounted(() => settings.load())
       <ThemeToggle />
     </div>
     <form class="login-panel" @submit.prevent="submit">
-      <h1>{{ t('login') }}</h1>
+      <h1>{{ t('adminLogin') }}</h1>
       <label>
         {{ t('username') }}
         <input v-model="form.username" autocomplete="username" />
