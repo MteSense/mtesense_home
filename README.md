@@ -83,7 +83,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mte
 
 ## Docker 部署
 
-Docker 部署支持两种模式：可以在本地或 VPS 上用源码直接构建运行，也可以先把镜像发布到 Docker Hub，再在任意 Linux VPS 上拉取运行。
+Docker 部署支持三种模式：可以在本地或 VPS 上用源码直接构建运行，也可以直接拉取 GHCR 镜像运行，或者先把镜像发布到 Docker Hub 后再部署。
 
 容器内默认路径：
 
@@ -121,7 +121,36 @@ docker run -d --name mtesense-home \
   mtesense-home:local
 ```
 
-### 模式二：Docker Hub 镜像部署
+### 模式二：GHCR 镜像部署
+
+适合直接使用 GitHub Container Registry 上已经构建好的镜像部署：
+
+```bash
+docker pull ghcr.io/mtesense/mtesense-home:latest
+```
+
+在 VPS 上直接运行：
+
+```bash
+docker run -d --name mtesense-home \
+  -p 8080:8080 \
+  -e JWT_SECRET=replace-with-a-long-random-secret \
+  -e PUBLIC_SITE_URL=https://example.com \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_PASSWORD=admin123456 \
+  -v mtesense_data:/app/data \
+  -v mtesense_uploads:/app/public_uploads \
+  --restart unless-stopped \
+  ghcr.io/mtesense/mtesense-home:latest
+```
+
+如果 GHCR 镜像保持私有，需要先在 VPS 上登录：
+
+```bash
+docker login ghcr.io
+```
+
+### 模式三：Docker Hub 镜像部署
 
 适合先构建并发布镜像，然后在任意 Linux VPS 上拉取即部署。先把 `your-dockerhub-name` 替换成自己的 Docker Hub 用户名或组织名：
 
